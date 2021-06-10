@@ -1,3 +1,4 @@
+use better_kill::app;
 use clap::{App, Arg};
 
 fn main() {
@@ -53,4 +54,6 @@ fn main() {
 				),
 		)
 		.get_matches();
+
+	app();
 }
