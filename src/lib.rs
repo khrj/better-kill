@@ -1,6 +1,16 @@
 mod kill;
 mod list;
+mod types;
 
-use crate::list::get_processes;
+use sysinfo::{System, SystemExt};
 
-pub fn app() { get_processes(); }
+use crate::{
+	list::get_processes,
+	types::{UidType, Users},
+};
+
+pub fn app() {
+	let sys = System::new_all();
+	let procs = get_processes(&sys, Users::Some(vec![UidType::Current]));
+	println!("{:#?}", procs);
+}

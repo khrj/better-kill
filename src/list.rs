@@ -1,29 +1,66 @@
-use std::collections::HashMap;
-
-use sysinfo::{Process, ProcessExt, System, SystemExt};
+use sysinfo::{ProcessExt, System, SystemExt};
 use users::get_current_uid;
 
-pub fn get_processes() {
-	let sys = System::new_all();
+use crate::types::{Process, UidType, Users};
+
+pub fn get_processes<'a>(sys: &'a System, users: Users) -> Vec<Process<'a>> {
 	let current_uid = get_current_uid();
 
-	let (self_procs, other_procs) = sys
-		.get_processes()
-		.iter()
-		.map(|(_pid, proc)| (proc.name(), proc.uid))
-		.fold(
-			(HashMap::new(), HashMap::new()),
-			|(mut current, mut other), (name, uid)| {
-				if uid == current_uid {
-					*current.entry(name).or_insert(0) += 1;
-				} else {
-					*other.entry(name).or_insert(0) += 1;
+	let processes = filter_processes(
+		sys.get_processes()
+			.iter()
+			.map(|(_pid, process)| {
+				Process {
+					name:  process.name(),
+					count: 1,
+					uid:   {
+						if process.uid == 0 {
+							UidType::Root
+						} else if process.uid == current_uid {
+							UidType::Current
+						} else {
+							UidType::Other(process.uid)
+						}
+					},
 				}
+			})
+			.fold(Vec::new(), |mut acc, process| {
+				increment_entry(&mut acc, process);
+				acc
+			}),
+		users,
+	);
 
-				(current, other)
-			},
-		);
+	processes
+}
 
-	println!("Current user:\n{:#?}", self_procs);
-	println!("Other users:\n{:#?}", other_procs);
+fn increment_entry<'a>(processes: &mut Vec<Process<'a>>, current_process: Process<'a>) {
+	for process in &mut *processes {
+		if process.name == current_process.name {
+			process.count += 1;
+			return;
+		}
+	}
+
+	processes.push(current_process);
+}
+
+fn filter_processes(processes: Vec<Process>, users: Users) -> Vec<Process> {
+	match users {
+		Users::All => processes,
+		Users::Some(users) => {
+			processes
+				.into_iter()
+				.filter(|process| {
+					for user in &users {
+						if process.uid == *user {
+							return true;
+						}
+					}
+
+					false
+				})
+				.collect()
+		}
+	}
 }
