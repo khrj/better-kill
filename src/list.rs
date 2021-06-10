@@ -51,15 +51,7 @@ fn filter_processes(processes: Vec<Process>, users: Users) -> Vec<Process> {
 		Users::Some(users) => {
 			processes
 				.into_iter()
-				.filter(|process| {
-					for user in &users {
-						if process.uid == *user {
-							return true;
-						}
-					}
-
-					false
-				})
+				.filter(|process| users.contains(&process.uid))
 				.collect()
 		}
 	}
