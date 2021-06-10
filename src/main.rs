@@ -35,5 +35,22 @@ fn main() {
 					"Enable interactive mode if args are not completely matched. Defaults to true",
 				),
 		)
+		.arg(
+			Arg::with_name("force")
+				.short("F")
+				.long("force")
+				.takes_value(false)
+				.help("Kill a process forcefully. Equivalent of --signal kill"),
+		)
+		.arg(
+			Arg::with_name("user")
+				.short("u")
+				.long("user")
+				.takes_value(true)
+				.help(
+					"User to list processes for. Defaults to current user. Use 'all' to list \
+					 processes owned by any user",
+				),
+		)
 		.get_matches();
 }
