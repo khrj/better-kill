@@ -2,7 +2,7 @@ use colored::*;
 
 use crate::types::Process;
 
-pub fn print_processes(processes: &Vec<Process>) {
+pub fn print_processes(processes: Vec<&Process>) {
 	processes.into_iter().for_each(|process| {
 		println!(
 			"{}({}): {}",
