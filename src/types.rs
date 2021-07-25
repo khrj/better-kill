@@ -1,7 +1,9 @@
 use std::fmt::Display;
 
+#[derive(Debug)]
 pub enum Users {
 	All,
+	NoRoot,
 	Some(Vec<UidType>),
 }
 
@@ -41,6 +43,6 @@ pub struct Options<'a> {
 	pub fuzzy:       bool,
 	pub all:         bool,
 	pub interactive: bool,
-	pub user:        &'a Vec<u8>,
+	pub users:       Users,
 	pub process:     Option<&'a str>,
 }

@@ -48,6 +48,18 @@ fn increment_entry<'a>(processes: &mut Vec<Process<'a>>, current_process: Proces
 fn filter_processes(processes: Vec<Process>, users: Users) -> Vec<Process> {
 	match users {
 		Users::All => processes,
+		Users::NoRoot => {
+			processes
+				.into_iter()
+				.filter(|process| {
+					if let UidType::Root = &process.uid {
+						false
+					} else {
+						true
+					}
+				})
+				.collect()
+		}
 		Users::Some(users) => {
 			processes
 				.into_iter()

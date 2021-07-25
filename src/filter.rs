@@ -1,5 +1,5 @@
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
-use log::debug;
+use log::trace;
 
 use crate::types::{Process, SearchMatch};
 
@@ -10,7 +10,7 @@ pub fn filter<'a>(processes: &'a Vec<Process>, name: &'a str) -> SearchMatch<'a>
 		.into_iter()
 		.filter(|process| {
 			let is_match = matcher.fuzzy_match(process.name, name).is_some();
-			debug!("Testing {} with {}: {}", process.name, name, is_match);
+			trace!("Testing {} with {}: {}", process.name, name, is_match);
 			is_match
 		})
 		.collect();

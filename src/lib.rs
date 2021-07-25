@@ -6,6 +6,7 @@ pub mod types;
 
 use std::process;
 
+use log::debug;
 use sysinfo::{System, SystemExt};
 use types::Options;
 
@@ -17,6 +18,8 @@ use crate::{
 };
 
 pub fn app(options: Options) {
+	debug!("{:#?}", options);
+
 	let sys = System::new_all();
 	let procs = get_processes(&sys, Users::Some(vec![UidType::Current]));
 
