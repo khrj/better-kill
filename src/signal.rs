@@ -1,69 +1,50 @@
 use std::process;
 
-use sysinfo::Signal::{self, *};
+use libc;
 
 #[derive(Debug)]
-pub struct ProcessSignal(pub Signal);
+pub struct Signal(pub i32);
 
-impl From<u8> for ProcessSignal {
-	fn from(code: u8) -> Self {
-		ProcessSignal(match code {
-			1 => Hangup,
-			2 => Interrupt,
-			3 => Quit,
-			4 => Illegal,
-			5 => Trap,
-			6 => Abort,
-			8 => FloatingPointException,
-			9 => Kill,
-			11 => Segv,
-			13 => Pipe,
-			14 => Alarm,
-			15 => Term,
-			n => {
-				eprintln!("Unknown signal '{}'. Try bkill --help", n);
-				process::exit(1);
-			}
-		})
-	}
+impl From<i32> for Signal {
+	fn from(code: i32) -> Self { Signal(code) }
 }
 
-impl From<&str> for ProcessSignal {
+impl From<&str> for Signal {
 	#[rustfmt::skip]
 	fn from(signal: &str) -> Self {
-		ProcessSignal(match signal.to_uppercase().as_str() {
-			"HUP"     | "SIGHUP"   | "HANGUP"    => Hangup,
-			"INT"     | "SIGINT"   | "INTERRUPT" => Interrupt,
-			"QUIT"    | "SIGQUIT"                => Quit,
-			"ILL"     | "SIGILL"   | "ILLEGAL"   => Illegal,
-			"TRAP"    | "SIGTRAP"                => Trap,
-			"ABRT"    | "SIGABRT"  | "ABORT"     => Abort,
-			"IOT"     | "SIGIOT"                 => IOT,
-			"BUS"     | "SIGBUS"                 => Bus,
-			"FPE"     | "SIGFPE"                 => FloatingPointException,
-			"KILL"    | "SIGKILL"                => Kill,
-			"USR1"    | "SIGUSR1"  | "USER1"     => User1,
-			"SEGV"    | "SIGSGEV"                => Segv,
-			"USR2"    | "SIGUSR2"  | "USER2"     => User2,
-			"PIPE"    | "SIGPIPE"                => Pipe, 
-			"ALRM"    | "SIGALRM"  | "ALARM"     => Alarm,
-			"TERM"    | "SIGTERM"  | "TERMINATE" => Term,
-			"CHLD"    | "SIGCHILD" | "CHILD"     => Child,
-			"CONT"    | "SIGCONT"  | "CONTINUE"  => Continue,
-			"STOP"    | "SIGSTOP"                => Stop,
-			"TSTP"    | "SIGTSTP"                => TSTP,
-			"TTIN"    | "SIGTTIN"                => TTIN,
-			"TTOU"    | "SIGTTOU"                => TTOU,
-			"URG"     | "SIGURG"   | "URGENT"    => Urgent,
-			"XCPU"    | "SIGXCPU"                => XCPU,
-			"XFSZ"    | "SIGXFSZ"                => XFSZ,
-			"VTALRM"  | "SIGVTALRM"              => VirtualAlarm,
-			"PROF"    | "SIGPROF"  | "PROFILING" => Profiling,
-			"WINCH"   | "SIGWINCH"               => Winch,
-			"IO"      | "SIGIO"                  => IO,
-			"POLL"    | "SIGPOLL"                => Poll,
-			"PWR"     | "SIGPWR"   | "POWER"     => Power,
-			"SYS"     | "SIGSYS"                 => Sys,
+		Signal(match signal.to_uppercase().as_str() {
+			"HUP"     | "SIGHUP"   | "HANGUP"    => libc::SIGHUP,
+			"INT"     | "SIGINT"   | "INTERRUPT" => libc::SIGINT,
+			"QUIT"    | "SIGQUIT"                => libc::SIGQUIT,
+			"ILL"     | "SIGILL"   | "ILLEGAL"   => libc::SIGILL,
+			"TRAP"    | "SIGTRAP"                => libc::SIGTRAP,
+			"ABRT"    | "SIGABRT"  | "ABORT"     => libc::SIGABRT,
+			"IOT"     | "SIGIOT"                 => libc::SIGIOT,
+			"BUS"     | "SIGBUS"                 => libc::SIGBUS,
+			"FPE"     | "SIGFPE"                 => libc::SIGFPE,
+			"KILL"    | "SIGKILL"                => libc::SIGKILL,
+			"USR1"    | "SIGUSR1"  | "USER1"     => libc::SIGUSR1,
+			"SEGV"    | "SIGSGEV"                => libc::SIGSEGV,
+			"USR2"    | "SIGUSR2"  | "USER2"     => libc::SIGUSR2,
+			"PIPE"    | "SIGPIPE"                => libc::SIGPIPE, 
+			"ALRM"    | "SIGALRM"  | "ALARM"     => libc::SIGALRM,
+			"TERM"    | "SIGTERM"  | "TERMINATE" => libc::SIGTERM,
+			"CHLD"    | "SIGCHILD" | "CHILD"     => libc::SIGCHLD,
+			"CONT"    | "SIGCONT"  | "CONTINUE"  => libc::SIGCONT,
+			"STOP"    | "SIGSTOP"                => libc::SIGSTOP,
+			"TSTP"    | "SIGTSTP"                => libc::SIGTSTP,
+			"TTIN"    | "SIGTTIN"                => libc::SIGTTIN,
+			"TTOU"    | "SIGTTOU"                => libc::SIGTTOU,
+			"URG"     | "SIGURG"   | "URGENT"    => libc::SIGURG,
+			"XCPU"    | "SIGXCPU"                => libc::SIGXCPU,
+			"XFSZ"    | "SIGXFSZ"                => libc::SIGXFSZ,
+			"VTALRM"  | "SIGVTALRM"              => libc::SIGVTALRM,
+			"PROF"    | "SIGPROF"  | "PROFILING" => libc::SIGPROF,
+			"WINCH"   | "SIGWINCH"               => libc::SIGWINCH,
+			"IO"      | "SIGIO"                  => libc::SIGIO,
+			"POLL"    | "SIGPOLL"                => libc::SIGPOLL,
+			"PWR"     | "SIGPWR"   | "POWER"     => libc::SIGPWR,
+			"SYS"     | "SIGSYS"                 => libc::SIGSYS,
 			other => {
 				eprintln!("Unknown signal '{}'. Try bkill --help", other);
 				process::exit(1);
