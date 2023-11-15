@@ -2,6 +2,7 @@ use std::process;
 
 use better_kill::{
 	app,
+	signal::Signal,
 	types::{Options, UidType, Users},
 };
 use clap::clap_app;
@@ -32,26 +33,12 @@ fn main() {
 		all:         !matches.is_present("single"),
 		interactive: !matches.is_present("uninteractive"),
 		signal:      if matches.is_present("force") {
-			9
+			Signal(libc::SIGKILL)
 		} else {
 			let signal = matches.value_of_lossy("SIGNAL").unwrap();
-			match signal.parse() {
-				Ok(n) => n,
-				Err(_) => {
-					match signal.to_uppercase().as_str() {
-						"HUP" | "SIGHUP" | "HANGUP" => 1,
-						"INT" | "SIGINT" | "INTERRUPT" => 2,
-						"QUIT" | "SIGQUIT" => 3,
-						"ABRT" | "SIGABRT" | "ABORT" => 6,
-						"KILL" | "SIGKILL" => 9,
-						"ALRM" | "SIGALRM" | "ALARM" => 14,
-						"TERM" | "SIGTERM" | "TERMINATE" => 15,
-						_ => {
-							eprintln!("Unknown signal. Try bkill --help");
-							process::exit(1);
-						}
-					}
-				}
+			match signal.parse::<i32>() {
+				Ok(n) => Signal::from(n),
+				Err(_) => Signal::from(signal.as_ref()),
 			}
 		},
 		users:       {

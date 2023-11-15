@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use crate::signal::Signal;
+
 #[derive(Debug)]
 pub enum Users {
 	All,
@@ -32,17 +34,18 @@ impl Display for UidType {
 
 #[derive(Debug)]
 pub struct Process<'a> {
-	pub name:  &'a str,
-	pub uid:   UidType,
+	pub name: &'a str,
+	pub uid: UidType,
 	pub count: u32,
+	pub handle: &'a sysinfo::Process,
 }
 
 #[derive(Debug)]
 pub struct Options<'a> {
-	pub signal:      u8,
-	pub fuzzy:       bool,
-	pub all:         bool,
+	pub signal: Signal,
+	pub fuzzy: bool,
+	pub all: bool,
 	pub interactive: bool,
-	pub users:       Users,
-	pub process:     Option<&'a str>,
+	pub users: Users,
+	pub process: Option<&'a str>,
 }
